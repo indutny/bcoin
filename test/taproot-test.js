@@ -4,7 +4,14 @@
 'use strict';
 
 const assert = require('bsert');
+const TX = require('../lib/primitives/tx');
 const {TaggedHash} = require('../lib/utils/taggedhash');
+const common = require('./util/common');
+
+// Test data from https://github.com/pinheadmz/bitcoin/tree/taproottest1
+const taprootTXs = require('./data/taproot_tx_data_single_input.json');
+
+const tests = taprootTXs.tests;
 
 describe('Taproot', function() {
   it('should create a generic tagged hash', () => {
@@ -28,5 +35,35 @@ describe('Taproot', function() {
         'hex'
       )
     );
+  });
+
+  it('should get annex from witness', () => {
+    // None of the legacy or SegWit TXs in ./data are Taproot-spenders
+    for (let i = 1; i < 11; i++) {
+      const txContext = common.readTX(`tx${i}`);
+      const [tx] = txContext.getTX();
+      for (const input of tx.inputs) {
+        const witness = input.witness;
+        assert.strictEqual(witness.getAnnex(), null);
+      }
+    }
+
+    for (const test of tests) {
+      // Ignore fail tests
+      if (test.fail_input < test.inputs.length)
+        continue;
+
+      const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
+
+      for (let i = 0; i < tx.inputs.length; i++) {
+        const expected = test.inputs[i].annex;
+        const actual = tx.inputs[i].witness.getAnnex();
+
+        if (expected == null)
+          assert.strictEqual(actual, null);
+        else
+          assert.bufferEqual(Buffer.from(expected, 'hex'), actual);
+      }
+    }
   });
 });
