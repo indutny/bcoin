@@ -66,4 +66,30 @@ describe('Taproot', function() {
       }
     }
   });
+
+  it('should get spend type from witness', () => {
+    for (const test of tests) {
+      // Ignore fail tests
+      if (test.fail_input < test.inputs.length)
+        continue;
+
+      const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
+
+      for (let i = 0; i < tx.inputs.length; i++) {
+        const spendtype = tx.inputs[i].witness.getSpendType();
+
+        if (test.inputs[i].annex != null)
+          assert(spendtype & (1 << 0));
+
+        if (test.inputs[i].annex == null)
+          assert(~spendtype & (1 << 0));
+
+        if (test.inputs[i].script != null)
+          assert(spendtype & (1 << 1));
+
+        if (test.inputs[i].script == null)
+          assert(~spendtype & (1 << 1));
+      }
+    }
+  });
 });
