@@ -5,13 +5,17 @@
 
 const assert = require('bsert');
 const TX = require('../lib/primitives/tx');
+const Coin = require('../lib/primitives/coin');
 const {TaggedHash} = require('../lib/utils/taggedhash');
+const Script = require('../lib/script/script');
+const {digests} = Script;
 const common = require('./util/common');
 
 // Test data from https://github.com/pinheadmz/bitcoin/tree/taproottest1
 const taprootTXs = require('./data/taproot_tx_data_single_input.json');
 
 const tests = taprootTXs.tests;
+const UTXOs = taprootTXs.UTXOs;
 
 describe('Taproot', function() {
   it('should create a generic tagged hash', () => {
@@ -109,6 +113,79 @@ describe('Taproot', function() {
           assert(actual == null);
         else
           assert.bufferEqual(Buffer.from(expected, 'hex'), actual);
+      }
+    }
+  });
+
+  it('should compute sighash', () => {
+    for (const test of tests) {
+      // Ignore fail tests
+      if (test.fail_input < test.inputs.length)
+        continue;
+
+      const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
+
+      // Collect all inputs to this TX
+      const coins = [];
+      for (let i = 0; i < tx.inputs.length; i++) {
+        const key = tx.inputs[i].prevout.toKey();
+
+        const utxo = UTXOs[key.toString('hex')];
+
+        const coin = Coin.fromKey(key);
+        coin.value = utxo.value;
+        coin.script = Script.fromJSON(utxo.scriptPubKey);
+
+        coins.push(coin);
+      }
+
+      // Test the sighash of each input
+      for (let i = 0; i < tx.inputs.length; i++) {
+        // Not all tests have a sighash ("alwaysvalid")
+        if (test.inputs[i].sighash == null)
+          continue;
+
+        // For most of these tests, the top witness stack item is the signature
+        const sig = tx.inputs[i].witness.items[0];
+
+        // In Taproot, SIGHASH_ALL is default
+        let type = 0;
+        if (sig.length === 65)
+          type = sig[sig.length - 1];
+        else if (sig.length !== 64)
+          continue;
+
+        // Find the last executed OP_CODESEPARATOR (default/none = 0xffffffff).
+        // Normally computed in Script.execute() but since we're not preocessing
+        // any script at all for this test, we'll cheat based on
+        // bitcoin/test/functional/feature_taproot.py build_spenders()
+        let codesepPos = 0xffffffff;
+        switch (test.inputs[i].comment) {
+          case 'sighash/codesep#s1':
+            codesepPos = 0;
+            break;
+          case 'sighash/codesep#s2a':
+            codesepPos = 3;
+            break;
+          case 'sighash/codesep#s2b':
+            codesepPos = 6;
+            break;
+        }
+
+        const coin = coins[i];
+        const actual = tx.signatureHash(
+          i,
+          coin.script,
+          coin.value,
+          type,
+          digests.TAPROOT,
+          coins,
+          codesepPos
+        );
+
+        const expected = Buffer.from(test.inputs[i].sighash, 'hex');
+
+        assert.bufferEqual(expected, actual);
       }
     }
   });
