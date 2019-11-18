@@ -92,4 +92,24 @@ describe('Taproot', function() {
       }
     }
   });
+
+  it('should get tapleaf (script) from witness', () => {
+    for (const test of tests) {
+      // Ignore fail tests
+      if (test.fail_input < test.inputs.length)
+        continue;
+
+      const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
+
+      for (let i = 0; i < tx.inputs.length; i++) {
+        const actual = tx.inputs[i].witness.getTapleaf();
+        const expected = test.inputs[i].script;
+
+        if (test.inputs[i].script == null)
+          assert(actual == null);
+        else
+          assert.bufferEqual(Buffer.from(expected, 'hex'), actual);
+      }
+    }
+  });
 });
