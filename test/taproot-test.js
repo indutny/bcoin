@@ -41,7 +41,7 @@ describe('Taproot', function() {
     );
   });
 
-  it('should get annex from witness', () => {
+  it('should not find annex in non-taproot TX', () => {
     // None of the legacy or SegWit TXs in ./data are Taproot-spenders
     for (let i = 1; i < 11; i++) {
       const txContext = common.readTX(`tx${i}`);
@@ -51,78 +51,79 @@ describe('Taproot', function() {
         assert.strictEqual(witness.getAnnex(), null);
       }
     }
+  });
 
+  describe('Get annex from witness', function() {
     for (const test of tests) {
-      // Ignore fail tests
-      if (test.fail_input < test.inputs.length)
-        continue;
-
       const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
 
       for (let i = 0; i < tx.inputs.length; i++) {
-        const expected = test.inputs[i].annex;
-        const actual = tx.inputs[i].witness.getAnnex();
+        it(`${test.inputs[i].comment}`, () => {
+          if (test.fail_input === i)
+            this.skip();
 
-        if (expected == null)
-          assert.strictEqual(actual, null);
-        else
-          assert.bufferEqual(Buffer.from(expected, 'hex'), actual);
+            const expected = test.inputs[i].annex;
+            const actual = tx.inputs[i].witness.getAnnex();
+
+            if (expected == null)
+              assert.strictEqual(actual, null);
+            else
+              assert.bufferEqual(Buffer.from(expected, 'hex'), actual);
+        });
       }
     }
   });
 
-  it('should get spend type from witness', () => {
+  describe('Get spend type from witness', function() {
     for (const test of tests) {
-      // Ignore fail tests
-      if (test.fail_input < test.inputs.length)
-        continue;
-
       const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
 
       for (let i = 0; i < tx.inputs.length; i++) {
-        const spendtype = tx.inputs[i].witness.getSpendType();
+        it(`${test.inputs[i].comment}`, () => {
+          if (test.fail_input === i)
+            this.skip();
 
-        if (test.inputs[i].annex != null)
-          assert(spendtype & (1 << 0));
+          const spendtype = tx.inputs[i].witness.getSpendType();
 
-        if (test.inputs[i].annex == null)
-          assert(~spendtype & (1 << 0));
+          if (test.inputs[i].annex != null)
+            assert(spendtype & (1 << 0));
 
-        if (test.inputs[i].script != null)
-          assert(spendtype & (1 << 1));
+          if (test.inputs[i].annex == null)
+            assert(~spendtype & (1 << 0));
 
-        if (test.inputs[i].script == null)
-          assert(~spendtype & (1 << 1));
+          if (test.inputs[i].script != null)
+            assert(spendtype & (1 << 1));
+
+          if (test.inputs[i].script == null)
+            assert(~spendtype & (1 << 1));
+        });
       }
     }
   });
 
-  it('should get tapleaf (script) from witness', () => {
+  describe('Get tapleaf (script) from witness', function() {
     for (const test of tests) {
-      // Ignore fail tests
-      if (test.fail_input < test.inputs.length)
-        continue;
-
       const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
 
       for (let i = 0; i < tx.inputs.length; i++) {
-        const actual = tx.inputs[i].witness.getTapleaf();
-        const expected = test.inputs[i].script;
+        it(`${test.inputs[i].comment}`, () => {
+          if (test.fail_input === i)
+            this.skip();
 
-        if (test.inputs[i].script == null)
-          assert(actual == null);
-        else
-          assert.bufferEqual(Buffer.from(expected, 'hex'), actual);
+          const actual = tx.inputs[i].witness.getTapleaf();
+          const expected = test.inputs[i].script;
+
+          if (test.inputs[i].script == null)
+            assert(actual == null);
+          else
+            assert.bufferEqual(Buffer.from(expected, 'hex'), actual);
+        });
       }
     }
   });
 
-  it('should compute sighash', () => {
+  describe('Compute sighash', function() {
     for (const test of tests) {
-      // Ignore fail tests
-      if (test.fail_input < test.inputs.length)
-        continue;
-
       const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
 
       // Collect all inputs to this TX
@@ -139,53 +140,57 @@ describe('Taproot', function() {
         coins.push(coin);
       }
 
-      // Test the sighash of each input
       for (let i = 0; i < tx.inputs.length; i++) {
-        // Not all tests have a sighash ("alwaysvalid")
-        if (test.inputs[i].sighash == null)
-          continue;
+        it(`${test.inputs[i].comment}`, () => {
+          if (test.fail_input === i)
+            this.skip();
 
-        // For most of these tests, the top witness stack item is the signature
-        const sig = tx.inputs[i].witness.items[0];
+          // Not all tests have a sighash ("alwaysvalid")
+          if (test.inputs[i].sighash == null)
+            this.skip();
 
-        // In Taproot, SIGHASH_ALL is default
-        let type = 0;
-        if (sig.length === 65)
-          type = sig[sig.length - 1];
-        else if (sig.length !== 64)
-          continue;
+          // For most of these tests, the top witness stack item is the signature
+          const sig = tx.inputs[i].witness.items[0];
 
-        // Find the last executed OP_CODESEPARATOR (default/none = 0xffffffff).
-        // Normally computed in Script.execute() but since we're not preocessing
-        // any script at all for this test, we'll cheat based on
-        // bitcoin/test/functional/feature_taproot.py build_spenders()
-        let codesepPos = 0xffffffff;
-        switch (test.inputs[i].comment) {
-          case 'sighash/codesep#s1':
-            codesepPos = 0;
-            break;
-          case 'sighash/codesep#s2a':
-            codesepPos = 3;
-            break;
-          case 'sighash/codesep#s2b':
-            codesepPos = 6;
-            break;
-        }
+          // In Taproot, SIGHASH_ALL is default
+          let type = 0;
+          if (sig.length === 65)
+            type = sig[sig.length - 1];
+          else if (sig.length !== 64)
+            this.skip();
 
-        const coin = coins[i];
-        const actual = tx.signatureHash(
-          i,
-          coin.script,
-          coin.value,
-          type,
-          digests.TAPROOT,
-          coins,
-          codesepPos
-        );
+          // Find the last executed OP_CODESEPARATOR (default/none = 0xffffffff).
+          // Normally computed in Script.execute() but since we're not preocessing
+          // any script at all for this test, we'll cheat based on
+          // bitcoin/test/functional/feature_taproot.py build_spenders()
+          let codesepPos = 0xffffffff;
+          switch (test.inputs[i].comment) {
+            case 'sighash/codesep#s1':
+              codesepPos = 0;
+              break;
+            case 'sighash/codesep#s2a':
+              codesepPos = 3;
+              break;
+            case 'sighash/codesep#s2b':
+              codesepPos = 6;
+              break;
+          }
 
-        const expected = Buffer.from(test.inputs[i].sighash, 'hex');
+          const coin = coins[i];
+          const actual = tx.signatureHash(
+            i,
+            coin.script,
+            coin.value,
+            type,
+            digests.TAPROOT,
+            coins,
+            codesepPos
+          );
 
-        assert.bufferEqual(expected, actual);
+          const expected = Buffer.from(test.inputs[i].sighash, 'hex');
+
+          assert.bufferEqual(expected, actual);
+        });
       }
     }
   });
