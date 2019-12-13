@@ -24,28 +24,22 @@ void
 bcrypto_poly1305_init(bcrypto_poly1305_ctx *ctx, const unsigned char key[32]);
 
 void
-bcrypto_poly1305_update(
-  bcrypto_poly1305_ctx *ctx,
-  const unsigned char *m,
-  size_t bytes
-);
+bcrypto_poly1305_update(bcrypto_poly1305_ctx *ctx,
+                        const unsigned char *m,
+                        size_t bytes);
 
 void
 bcrypto_poly1305_finish(bcrypto_poly1305_ctx *ctx, unsigned char mac[16]);
 
 void
-bcrypto_poly1305_auth(
-  unsigned char mac[16],
-  const unsigned char *m,
-  size_t bytes,
-  const unsigned char key[32]
-);
+bcrypto_poly1305_auth(unsigned char mac[16],
+                      const unsigned char *m,
+                      size_t bytes,
+                      const unsigned char key[32]);
 
 int
-bcrypto_poly1305_verify(
-  const unsigned char mac1[16],
-  const unsigned char mac2[16]
-);
+bcrypto_poly1305_verify(const unsigned char mac1[16],
+                        const unsigned char mac2[16]);
 
 int
 bcrypto_poly1305_power_on_self_test(void);

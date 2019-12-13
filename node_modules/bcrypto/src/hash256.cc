@@ -5,6 +5,7 @@ static Nan::Persistent<v8::FunctionTemplate> hash256_constructor;
 
 BHash256::BHash256() {
   memset(&ctx, 0, sizeof(SHA256_CTX));
+  started = false;
 }
 
 BHash256::~BHash256() {}
@@ -48,6 +49,7 @@ NAN_METHOD(BHash256::Init) {
   BHash256 *hash = ObjectWrap::Unwrap<BHash256>(info.Holder());
 
   SHA256_Init(&hash->ctx);
+  hash->started = true;
 
   info.GetReturnValue().Set(info.This());
 }
@@ -63,6 +65,9 @@ NAN_METHOD(BHash256::Update) {
   if (!node::Buffer::HasInstance(buf))
     return Nan::ThrowTypeError("First argument must be a buffer.");
 
+  if (!hash->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   const uint8_t *in = (const uint8_t *)node::Buffer::Data(buf);
   size_t inlen = node::Buffer::Length(buf);
 
@@ -74,6 +79,9 @@ NAN_METHOD(BHash256::Update) {
 NAN_METHOD(BHash256::Final) {
   BHash256 *hash = ObjectWrap::Unwrap<BHash256>(info.Holder());
 
+  if (!hash->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   uint8_t out[32];
 
   SHA256_Final(&out[0], &hash->ctx);
@@ -81,6 +89,8 @@ NAN_METHOD(BHash256::Final) {
   SHA256_Init(&hash->ctx);
   SHA256_Update(&hash->ctx, &out[0], 32);
   SHA256_Final(&out[0], &hash->ctx);
+
+  hash->started = false;
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], 32).ToLocalChecked());

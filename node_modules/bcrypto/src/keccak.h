@@ -13,6 +13,7 @@ public:
   ~BKeccak();
 
   bcrypto_keccak_ctx ctx;
+  bool started;
 
 private:
   static NAN_METHOD(Init);

@@ -1,6 +1,6 @@
-#include "openssl/rand.h"
+#include "../random/random.h"
 
-void
-bcrypto_ed25519_randombytes_unsafe(void *p, size_t len) {
-  RAND_bytes(p, (int)len);
+int
+bcrypto_ed25519_randombytes(void *p, size_t len) {
+  return bcrypto_random(p, len);
 }

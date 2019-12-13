@@ -1,10 +1,12 @@
 #ifndef _BCRYPTO_DSA_ASYNC_HH
 #define _BCRYPTO_DSA_ASYNC_HH
 
+#include "compat.h"
+
+#ifdef BCRYPTO_HAS_DSA
+
 #include <node.h>
 #include <nan.h>
-
-#if NODE_MAJOR_VERSION >= 10
 #include "dsa/dsa.h"
 
 class BDSAWorker : public Nan::AsyncWorker {

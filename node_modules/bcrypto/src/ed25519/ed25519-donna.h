@@ -64,7 +64,7 @@ typedef unsigned char hash_512bits[64];
   Timing safe memory compare
 */
 static int
-bcrypto_ed25519_verify(
+bcrypto_ed25519_equal(
   const unsigned char *x,
   const unsigned char *y,
   size_t len

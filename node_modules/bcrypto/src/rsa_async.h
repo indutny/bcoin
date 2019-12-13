@@ -1,10 +1,12 @@
 #ifndef _BCRYPTO_RSA_ASYNC_HH
 #define _BCRYPTO_RSA_ASYNC_HH
 
+#include "compat.h"
+
+#ifdef BCRYPTO_HAS_RSA
+
 #include <node.h>
 #include <nan.h>
-
-#if NODE_MAJOR_VERSION >= 10
 #include "rsa/rsa.h"
 
 class BRSAWorker : public Nan::AsyncWorker {

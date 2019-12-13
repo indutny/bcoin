@@ -127,11 +127,9 @@ bcrypto_poly1305_freeze(unsigned char h[17]) {
 }
 
 static void
-bcrypto_poly1305_blocks(
-  bcrypto_poly1305_state_internal_t *st,
-  const unsigned char *m,
-  size_t bytes
-) {
+bcrypto_poly1305_blocks(bcrypto_poly1305_state_internal_t *st,
+                        const unsigned char *m,
+                        size_t bytes) {
   const unsigned char hibit = st->final ^ 1; // 1 << 128
 
   while (bytes >= bcrypto_poly1305_block_size) {

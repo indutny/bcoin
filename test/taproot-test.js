@@ -10,6 +10,7 @@ const {TaggedHash} = require('../lib/utils/taggedhash');
 const Script = require('../lib/script/script');
 const {digests} = Script;
 const common = require('./util/common');
+const Schnorr = require('bcrypto/lib/js/schnorr');
 
 // Test data from https://github.com/pinheadmz/bitcoin/tree/taproottest1
 const taprootTXs = require('./data/taproot_tx_data_single_input.json');
@@ -190,6 +191,39 @@ describe('Taproot', function() {
           const expected = Buffer.from(test.inputs[i].sighash, 'hex');
 
           assert.bufferEqual(expected, actual);
+        });
+      }
+    }
+  });
+
+  describe  ('Verify signature (schnorr)', function() {
+    for (const test of tests) {
+      const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
+
+      for (let i = 0; i < tx.inputs.length; i++) {
+        it(`${test.inputs[i].comment}`, () => {
+          if (test.fail_input === i)
+            this.skip();
+
+          // Skip script spends for now
+          if (test.inputs[i].script)
+            this.skip();
+
+          // Not all tests have a sighash ("alwaysvalid")
+          if (test.inputs[i].sighash == null)
+            this.skip();
+
+          const sighash = Buffer.from(test.inputs[i].sighash, 'hex');
+          const sig = tx.inputs[i].witness.items[0];
+
+          // Get pubkey from prevout scriptPubKey (witness program)
+          const key = tx.inputs[i].prevout.toKey();
+          const utxo = UTXOs[key.toString('hex')];
+          const script = Script.fromJSON(utxo.scriptPubKey);
+          const program = script.getProgram();
+          const pubkey = program.data;
+
+          assert(Schnorr.verify(sighash, sig.slice(0, 64), pubkey));
         });
       }
     }

@@ -13,6 +13,7 @@ public:
   ~BRIPEMD160();
 
   RIPEMD160_CTX ctx;
+  bool started;
 
 private:
   static NAN_METHOD(Init);

@@ -24,12 +24,6 @@
 #include "blake2b-impl.h"
 
 #ifdef BCRYPTO_USE_SSE
-#if defined(BCRYPTO_USE_SSE41) \
-  && defined(__GNUC__) \
-  && ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4))
-#pragma GCC target("sse4.1")
-#endif
-
 #include "blake2b-config.h"
 
 #ifdef HAVE_SSE2
@@ -50,8 +44,8 @@
 #include <x86intrin.h>
 #endif
 #include "blake2b-round.h"
-#endif // HAVE_SSE2
-#endif // BCRYPTO_USE_SSE
+#endif /* HAVE_SSE2 */
+#endif /* BCRYPTO_USE_SSE */
 
 static const uint64_t bcrypto_blake2b_IV[8] = {
   0x6a09e667f3bcc908ULL, 0xbb67ae8584caa73bULL,

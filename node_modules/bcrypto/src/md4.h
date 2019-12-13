@@ -13,6 +13,7 @@ public:
   ~BMD4();
 
   MD4_CTX ctx;
+  bool started;
 
 private:
   static NAN_METHOD(Init);

@@ -5,6 +5,7 @@ static Nan::Persistent<v8::FunctionTemplate> md4_constructor;
 
 BMD4::BMD4() {
   memset(&ctx, 0, sizeof(MD4_CTX));
+  started = false;
 }
 
 BMD4::~BMD4() {}
@@ -48,6 +49,7 @@ NAN_METHOD(BMD4::Init) {
   BMD4 *md4 = ObjectWrap::Unwrap<BMD4>(info.Holder());
 
   MD4_Init(&md4->ctx);
+  md4->started = true;
 
   info.GetReturnValue().Set(info.This());
 }
@@ -63,6 +65,9 @@ NAN_METHOD(BMD4::Update) {
   if (!node::Buffer::HasInstance(buf))
     return Nan::ThrowTypeError("First argument must be a buffer.");
 
+  if (!md4->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   const uint8_t *in = (const uint8_t *)node::Buffer::Data(buf);
   size_t inlen = node::Buffer::Length(buf);
 
@@ -74,9 +79,14 @@ NAN_METHOD(BMD4::Update) {
 NAN_METHOD(BMD4::Final) {
   BMD4 *md4 = ObjectWrap::Unwrap<BMD4>(info.Holder());
 
+  if (!md4->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   uint8_t out[16];
 
   MD4_Final(&out[0], &md4->ctx);
+
+  md4->started = false;
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], 16).ToLocalChecked());

@@ -36,6 +36,26 @@ static const bcrypto_curve448_scalar_t sc_p = {
   }
 };
 
+const bcrypto_curve448_scalar_t bcrypto_sc_inv_4 = {{{
+  BCRYPTO_SC_BCRYPTO_LIMB(0x48de30a4aad6113d),
+  BCRYPTO_SC_BCRYPTO_LIMB(0x085b309ca37163d5),
+  BCRYPTO_SC_BCRYPTO_LIMB(0x7113b6d26bb58da4),
+  BCRYPTO_SC_BCRYPTO_LIMB(0xffffffffdf3288fa),
+  BCRYPTO_SC_BCRYPTO_LIMB(0xffffffffffffffff),
+  BCRYPTO_SC_BCRYPTO_LIMB(0xffffffffffffffff),
+  BCRYPTO_SC_BCRYPTO_LIMB(0x0fffffffffffffff)
+}}};
+
+const bcrypto_curve448_scalar_t bcrypto_sc_inv_16 = {{{
+  BCRYPTO_SC_BCRYPTO_LIMB(0x9b15bccdd58b958c),
+  BCRYPTO_SC_BCRYPTO_LIMB(0x0a71fcc3cc4dbcca),
+  BCRYPTO_SC_BCRYPTO_LIMB(0x0d58a48706a2f10d),
+  BCRYPTO_SC_BCRYPTO_LIMB(0xffffffffd6ff2b39),
+  BCRYPTO_SC_BCRYPTO_LIMB(0xffffffffffffffff),
+  BCRYPTO_SC_BCRYPTO_LIMB(0xffffffffffffffff),
+  BCRYPTO_SC_BCRYPTO_LIMB(0x13ffffffffffffff)
+}}};
+
 #define BCRYPTO_WBITS BCRYPTO_C448_WORD_BITS   /* NB this may be different from BCRYPTO_ARCH_WORD_BITS */
 
 const bcrypto_curve448_scalar_t bcrypto_curve448_scalar_one = {{{1}}};

@@ -54,20 +54,16 @@ void
 bcrypto_keccak_512_init(bcrypto_keccak_ctx *ctx);
 
 void
-bcrypto_keccak_update(
-  bcrypto_keccak_ctx *ctx,
-  const unsigned char *msg,
-  size_t size
-);
+bcrypto_keccak_update(bcrypto_keccak_ctx *ctx,
+                      const unsigned char *msg,
+                      size_t size);
 
 int
-bcrypto_keccak_final(
-  bcrypto_keccak_ctx *ctx,
-  int pad,
-  unsigned char *result,
-  size_t digest_length,
-  size_t *result_length
-);
+bcrypto_keccak_final(bcrypto_keccak_ctx *ctx,
+                     unsigned char *result,
+                     size_t *result_length,
+                     size_t digest_length,
+                     int pad);
 
 #ifdef __cplusplus
 }

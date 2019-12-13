@@ -114,11 +114,9 @@ bcrypto_poly1305_init(bcrypto_poly1305_ctx *ctx, const unsigned char key[32]) {
 }
 
 static void
-bcrypto_poly1305_blocks(
-  bcrypto_poly1305_state_internal_t *st,
-  const unsigned char *m,
-  size_t bytes
-) {
+bcrypto_poly1305_blocks(bcrypto_poly1305_state_internal_t *st,
+                        const unsigned char *m,
+                        size_t bytes) {
   const unsigned long long hibit = st->final
     ? 0
     : ((unsigned long long)1 << 40); // 1 << 128

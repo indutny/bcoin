@@ -11,8 +11,8 @@ public:
     v8::Local<v8::Object> &dataHandle,
     v8::Local<v8::Object> &saltHandle,
     char *name,
-    const uint8_t *data,
-    size_t datalen,
+    const uint8_t *pass,
+    size_t passlen,
     const uint8_t *salt,
     size_t saltlen,
     uint32_t iter,
@@ -26,8 +26,8 @@ public:
 
 private:
   char *name;
-  const uint8_t *data;
-  size_t datalen;
+  const uint8_t *pass;
+  size_t passlen;
   const uint8_t *salt;
   size_t saltlen;
   uint32_t iter;

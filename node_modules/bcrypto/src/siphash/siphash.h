@@ -24,12 +24,10 @@ uint64_t
 bcrypto_siphash64k256(uint64_t num, const uint8_t *key);
 
 uint64_t
-bcrypto_sipmod(
-  const uint8_t *data,
-  size_t len,
-  const uint8_t *key,
-  uint64_t m
-);
+bcrypto_sipmod(const uint8_t *data,
+               size_t len,
+               const uint8_t *key,
+               uint64_t m);
 
 #if defined(__cplusplus)
 }

@@ -13,6 +13,7 @@ public:
   ~BSHA1();
 
   SHA_CTX ctx;
+  bool started;
 
 private:
   static NAN_METHOD(Init);

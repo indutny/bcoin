@@ -13,6 +13,7 @@ public:
   ~BMD5();
 
   MD5_CTX ctx;
+  bool started;
 
 private:
   static NAN_METHOD(Init);

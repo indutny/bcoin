@@ -15,7 +15,6 @@ BSiphash::Init(v8::Local<v8::Object> &target) {
   v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
   Nan::Export(obj, "siphash", BSiphash::Siphash);
-  Nan::Export(obj, "siphash256", BSiphash::Siphash); // compat
   Nan::Export(obj, "siphash32", BSiphash::Siphash32);
   Nan::Export(obj, "siphash64", BSiphash::Siphash64);
   Nan::Export(obj, "siphash32k256", BSiphash::Siphash32k256);

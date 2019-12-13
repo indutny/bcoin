@@ -13,6 +13,7 @@ public:
   ~BBLAKE2b();
 
   bcrypto_blake2b_ctx ctx;
+  bool started;
 
 private:
   static NAN_METHOD(Init);

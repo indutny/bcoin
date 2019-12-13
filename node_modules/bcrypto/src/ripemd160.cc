@@ -5,6 +5,7 @@ static Nan::Persistent<v8::FunctionTemplate> ripemd160_constructor;
 
 BRIPEMD160::BRIPEMD160() {
   memset(&ctx, 0, sizeof(RIPEMD160_CTX));
+  started = false;
 }
 
 BRIPEMD160::~BRIPEMD160() {}
@@ -48,6 +49,7 @@ NAN_METHOD(BRIPEMD160::Init) {
   BRIPEMD160 *rmd = ObjectWrap::Unwrap<BRIPEMD160>(info.Holder());
 
   RIPEMD160_Init(&rmd->ctx);
+  rmd->started = true;
 
   info.GetReturnValue().Set(info.This());
 }
@@ -63,6 +65,9 @@ NAN_METHOD(BRIPEMD160::Update) {
   if (!node::Buffer::HasInstance(buf))
     return Nan::ThrowTypeError("First argument must be a buffer.");
 
+  if (!rmd->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   const uint8_t *in = (const uint8_t *)node::Buffer::Data(buf);
   size_t inlen = node::Buffer::Length(buf);
 
@@ -74,9 +79,13 @@ NAN_METHOD(BRIPEMD160::Update) {
 NAN_METHOD(BRIPEMD160::Final) {
   BRIPEMD160 *rmd = ObjectWrap::Unwrap<BRIPEMD160>(info.Holder());
 
+  if (!rmd->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   uint8_t out[20];
 
   RIPEMD160_Final(&out[0], &rmd->ctx);
+  rmd->started = false;
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], 20).ToLocalChecked());

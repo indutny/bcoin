@@ -21,11 +21,9 @@
 #endif
 
 void
-bcrypto_poly1305_update(
-  bcrypto_poly1305_ctx *ctx,
-  const unsigned char *m,
-  size_t bytes
-) {
+bcrypto_poly1305_update(bcrypto_poly1305_ctx *ctx,
+                        const unsigned char *m,
+                        size_t bytes) {
   bcrypto_poly1305_state_internal_t *st =
     (bcrypto_poly1305_state_internal_t *)ctx;
   size_t i;
@@ -69,12 +67,10 @@ bcrypto_poly1305_update(
 }
 
 void
-bcrypto_poly1305_auth(
-  unsigned char mac[16],
-  const unsigned char *m,
-  size_t bytes,
-  const unsigned char key[32]
-) {
+bcrypto_poly1305_auth(unsigned char mac[16],
+                      const unsigned char *m,
+                      size_t bytes,
+                      const unsigned char key[32]) {
   bcrypto_poly1305_ctx ctx;
   bcrypto_poly1305_init(&ctx, key);
   bcrypto_poly1305_update(&ctx, m, bytes);
@@ -82,10 +78,8 @@ bcrypto_poly1305_auth(
 }
 
 int
-bcrypto_poly1305_verify(
-  const unsigned char mac1[16],
-  const unsigned char mac2[16]
-) {
+bcrypto_poly1305_verify(const unsigned char mac1[16],
+                        const unsigned char mac2[16]) {
   size_t i;
   unsigned int dif = 0;
 

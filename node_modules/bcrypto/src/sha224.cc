@@ -5,6 +5,7 @@ static Nan::Persistent<v8::FunctionTemplate> sha224_constructor;
 
 BSHA224::BSHA224() {
   memset(&ctx, 0, sizeof(SHA256_CTX));
+  started = false;
 }
 
 BSHA224::~BSHA224() {}
@@ -48,6 +49,7 @@ NAN_METHOD(BSHA224::Init) {
   BSHA224 *sha = ObjectWrap::Unwrap<BSHA224>(info.Holder());
 
   SHA224_Init(&sha->ctx);
+  sha->started = true;
 
   info.GetReturnValue().Set(info.This());
 }
@@ -63,6 +65,9 @@ NAN_METHOD(BSHA224::Update) {
   if (!node::Buffer::HasInstance(buf))
     return Nan::ThrowTypeError("First argument must be a buffer.");
 
+  if (!sha->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   const uint8_t *in = (const uint8_t *)node::Buffer::Data(buf);
   size_t inlen = node::Buffer::Length(buf);
 
@@ -74,9 +79,13 @@ NAN_METHOD(BSHA224::Update) {
 NAN_METHOD(BSHA224::Final) {
   BSHA224 *sha = ObjectWrap::Unwrap<BSHA224>(info.Holder());
 
+  if (!sha->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   uint8_t out[32];
 
   SHA224_Final(&out[0], &sha->ctx);
+  sha->started = false;
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], 28).ToLocalChecked());

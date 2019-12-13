@@ -37,7 +37,7 @@
 
 static BCRYPTO_BLAKE2S_INLINE uint32_t
 load32(const void *src) {
-#if defined(BCRYPTO_LITTLE_ENDIAN)
+#ifndef WORDS_BIGENDIAN
   uint32_t w;
   memcpy(&w, src, sizeof w);
   return w;
@@ -52,7 +52,7 @@ load32(const void *src) {
 
 static BCRYPTO_BLAKE2S_INLINE uint64_t
 load64(const void *src) {
-#if defined(BCRYPTO_LITTLE_ENDIAN)
+#ifndef WORDS_BIGENDIAN
   uint64_t w;
   memcpy(&w, src, sizeof w);
   return w;
@@ -71,7 +71,7 @@ load64(const void *src) {
 
 static BCRYPTO_BLAKE2S_INLINE uint16_t
 load16(const void *src) {
-#if defined(BCRYPTO_LITTLE_ENDIAN)
+#ifndef WORDS_BIGENDIAN
   uint16_t w;
   memcpy(&w, src, sizeof w);
   return w;
@@ -84,7 +84,7 @@ load16(const void *src) {
 
 static BCRYPTO_BLAKE2S_INLINE void
 store16(void *dst, uint16_t w) {
-#if defined(BCRYPTO_LITTLE_ENDIAN)
+#ifndef WORDS_BIGENDIAN
   memcpy(dst, &w, sizeof w);
 #else
   uint8_t *p = (uint8_t *)dst;
@@ -96,7 +96,7 @@ store16(void *dst, uint16_t w) {
 
 static BCRYPTO_BLAKE2S_INLINE void
 store32(void *dst, uint32_t w) {
-#if defined(BCRYPTO_LITTLE_ENDIAN)
+#ifndef WORDS_BIGENDIAN
   memcpy(dst, &w, sizeof w);
 #else
   uint8_t *p = (uint8_t *)dst;
@@ -109,7 +109,7 @@ store32(void *dst, uint32_t w) {
 
 static BCRYPTO_BLAKE2S_INLINE void
 store64(void *dst, uint64_t w) {
-#if defined(BCRYPTO_LITTLE_ENDIAN)
+#ifndef WORDS_BIGENDIAN
   memcpy(dst, &w, sizeof w);
 #else
   uint8_t *p = (uint8_t *)dst;

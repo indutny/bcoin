@@ -5,6 +5,7 @@ static Nan::Persistent<v8::FunctionTemplate> md5_constructor;
 
 BMD5::BMD5() {
   memset(&ctx, 0, sizeof(MD5_CTX));
+  started = false;
 }
 
 BMD5::~BMD5() {}
@@ -48,6 +49,7 @@ NAN_METHOD(BMD5::Init) {
   BMD5 *md5 = ObjectWrap::Unwrap<BMD5>(info.Holder());
 
   MD5_Init(&md5->ctx);
+  md5->started = true;
 
   info.GetReturnValue().Set(info.This());
 }
@@ -63,6 +65,9 @@ NAN_METHOD(BMD5::Update) {
   if (!node::Buffer::HasInstance(buf))
     return Nan::ThrowTypeError("First argument must be a buffer.");
 
+  if (!md5->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   const uint8_t *in = (const uint8_t *)node::Buffer::Data(buf);
   size_t inlen = node::Buffer::Length(buf);
 
@@ -74,9 +79,13 @@ NAN_METHOD(BMD5::Update) {
 NAN_METHOD(BMD5::Final) {
   BMD5 *md5 = ObjectWrap::Unwrap<BMD5>(info.Holder());
 
+  if (!md5->started)
+    return Nan::ThrowError("Context is not initialized.");
+
   uint8_t out[16];
 
   MD5_Final(&out[0], &md5->ctx);
+  md5->started = false;
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], 16).ToLocalChecked());

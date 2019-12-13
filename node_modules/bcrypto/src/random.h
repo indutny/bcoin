@@ -8,7 +8,10 @@ public:
   static void Init(v8::Local<v8::Object> &target);
 
 private:
+  static NAN_METHOD(RandomBytes);
   static NAN_METHOD(RandomFill);
+  static NAN_METHOD(RandomInt);
+  static NAN_METHOD(RandomRange);
 };
 
 #endif
