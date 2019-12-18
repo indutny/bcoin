@@ -228,4 +228,30 @@ describe('Taproot', function() {
       }
     }
   });
+
+  describe('Verify Taproot commitment', function() {
+    for (const test of tests) {
+      const tx = TX.fromRaw(Buffer.from(test.tx, 'hex'));
+
+      for (let i = 0; i < tx.inputs.length; i++) {
+        it(`${test.inputs[i].comment}`, () => {
+          if (test.fail_input === i)
+            this.skip();
+
+          // Only testing script spends
+          if (!test.inputs[i].script)
+            this.skip();
+
+          // Get pubkey from prevout scriptPubKey (witness program)
+          const key = tx.inputs[i].prevout.toKey();
+          const utxo = UTXOs[key.toString('hex')];
+          const script = Script.fromJSON(utxo.scriptPubKey);
+
+          const witness = tx.inputs[i].witness;
+
+          assert(Script.verifyTaprootCommitment(witness, script));
+        });
+      }
+    }
+  });
 });
