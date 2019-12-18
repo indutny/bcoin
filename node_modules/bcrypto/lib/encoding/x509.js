@@ -21,7 +21,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('../internal/assert');
 const asn1 = require('./asn1');
 const pem = require('./pem');
 const {types} = asn1;

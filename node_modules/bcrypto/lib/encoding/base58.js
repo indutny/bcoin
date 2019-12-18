@@ -6,8 +6,7 @@
 
 'use strict';
 
-try {
-  module.exports = require('../native/base58');
-} catch (e) {
+if (process.env.NODE_BACKEND === 'js')
   module.exports = require('../js/base58');
-}
+else
+  module.exports = require('../native/base58');

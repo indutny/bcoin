@@ -6,4 +6,4 @@
 
 'use strict';
 
-module.exports = require('./js/bn.js');
+module.exports = require('./js/bn');

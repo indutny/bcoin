@@ -6,24 +6,42 @@
 
 'use strict';
 
-const {MD5} = require('./binding');
-const HMAC = require('../internal/hmac');
+const binding = require('./binding');
+const {Hash, HMAC, hashes} = binding;
 
 /*
  * MD5
  */
 
-MD5.hash = function hash() {
-  return new MD5();
-};
+class MD5 extends Hash {
+  constructor() {
+    super(hashes.MD5);
+  }
 
-MD5.hmac = function hmac() {
-  return new HMAC(MD5, 64);
-};
+  static hash() {
+    return new MD5();
+  }
 
-MD5.mac = function mac(data, key) {
-  return MD5.hmac().init(key).update(data).final();
-};
+  static hmac() {
+    return new HMAC(hashes.MD5);
+  }
+
+  static digest(data) {
+    return Hash.digest(hashes.MD5, data);
+  }
+
+  static root(left, right) {
+    return Hash.root(hashes.MD5, left, right);
+  }
+
+  static multi(x, y, z) {
+    return Hash.multi(hashes.MD5, x, y, z);
+  }
+
+  static mac(data, key) {
+    return HMAC.digest(hashes.MD5, data, key);
+  }
+}
 
 /*
  * Static

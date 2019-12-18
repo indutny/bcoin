@@ -22,7 +22,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('../internal/assert');
 const base64 = require('./base64');
 const lines = require('./lines');
 

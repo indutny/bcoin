@@ -19,4 +19,4 @@ const pre = require('./precomputed/ed25519.json');
  * Expose
  */
 
-module.exports = new EDDSA('ED25519', 'X25519', SHA512, pre);
+module.exports = new EDDSA('ED25519', 'X25519', null, SHA512, pre);

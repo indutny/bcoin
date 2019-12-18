@@ -6,11 +6,7 @@
 
 'use strict';
 
-try {
+if (process.env.NODE_BACKEND === 'js')
+  module.exports = require('./js/rsa');
+else
   module.exports = require('./native/rsa');
-} catch (e) {
-  if (process.env.NODE_BACKEND === 'js')
-    module.exports = require('./js/rsa');
-  else
-    module.exports = require('./node/rsa');
-}

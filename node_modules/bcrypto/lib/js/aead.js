@@ -10,7 +10,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('../internal/assert');
 const ChaCha20 = require('./chacha20');
 const Poly1305 = require('./poly1305');
 

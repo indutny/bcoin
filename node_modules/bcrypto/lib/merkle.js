@@ -12,7 +12,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('./internal/assert');
 
 // Notes about unbalanced merkle trees:
 //

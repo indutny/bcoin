@@ -17,7 +17,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('./internal/assert');
 const bio = require('bufio');
 const {PEMBlock} = require('./encoding/pem');
 const {countLeft} = require('./encoding/util');

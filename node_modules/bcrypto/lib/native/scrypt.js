@@ -6,7 +6,7 @@
 
 'use strict';
 
-const binding = require('./binding').scrypt;
+const backend = require('./binding').scrypt;
 
 /**
  * Perform scrypt key derivation.
@@ -29,7 +29,7 @@ function derive(passwd, salt, N, r, p, len) {
   if (salt == null)
     salt = Buffer.alloc(0);
 
-  return binding.derive(passwd, salt, N, r, p, len);
+  return backend.derive(passwd, salt, N, r, p, len);
 }
 
 /**
@@ -63,7 +63,7 @@ async function deriveAsync(passwd, salt, N, r, p, len) {
     };
 
     try {
-      binding.deriveAsync(passwd, salt, N, r, p, len, cb);
+      backend.deriveAsync(passwd, salt, N, r, p, len, cb);
     } catch (e) {
       reject(e);
     }

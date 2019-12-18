@@ -1,5 +1,5 @@
+#include <torsion/kdf.h>
 #include "common.h"
-#include "scrypt/scrypt.h"
 #include "scrypt_async.h"
 
 BScryptWorker::BScryptWorker (
@@ -30,7 +30,12 @@ BScryptWorker::BScryptWorker (
   SaveToPersistent("salt", saltHandle);
 }
 
-BScryptWorker::~BScryptWorker() {}
+BScryptWorker::~BScryptWorker() {
+  if (key != NULL) {
+    free(key);
+    key = NULL;
+  }
+}
 
 void
 BScryptWorker::Execute() {
@@ -41,23 +46,20 @@ BScryptWorker::Execute() {
     return;
   }
 
-  if (!bcrypto_scrypt(key, pass, passlen, salt, saltlen, N, r, p, keylen)) {
-    free(key);
-    key = NULL;
+  if (!scrypt_derive(key, pass, passlen, salt, saltlen, N, r, p, keylen))
     SetErrorMessage("Scrypt failed.");
-  }
 }
 
 void
 BScryptWorker::HandleOKCallback() {
   Nan::HandleScope scope;
 
-  assert(key);
+  assert(key != NULL);
 
-  v8::Local<v8::Value> keyBuffer =
-    Nan::NewBuffer((char *)key, keylen).ToLocalChecked();
-
-  v8::Local<v8::Value> argv[] = { Nan::Null(), keyBuffer };
+  v8::Local<v8::Value> argv[] = {
+    Nan::Null(),
+    Nan::NewBuffer((char *)key, keylen).ToLocalChecked()
+  };
 
   key = NULL;
 

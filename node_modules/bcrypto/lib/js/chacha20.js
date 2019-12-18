@@ -11,7 +11,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('../internal/assert');
 
 /*
  * Constants

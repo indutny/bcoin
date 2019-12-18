@@ -46,15 +46,15 @@ NAN_METHOD(BCash32::Serialize) {
   char output[197];
   size_t output_len = 0;
 
-  memset(&output[0], 0, sizeof(output));
+  memset(output, 0, sizeof(output));
 
   if (!bcrypto_cash32_serialize(&err, output, prefix, data, data_len))
     return Nan::ThrowError(bcrypto_cash32_strerror(err));
 
-  output_len = strlen(&output[0]);
+  output_len = strlen(output);
 
   info.GetReturnValue().Set(
-    Nan::New<v8::String>(&output[0], output_len).ToLocalChecked());
+    Nan::New<v8::String>(output, output_len).ToLocalChecked());
 }
 
 NAN_METHOD(BCash32::Deserialize) {
@@ -81,23 +81,23 @@ NAN_METHOD(BCash32::Deserialize) {
   uint8_t data[188];
   size_t data_len = 0;
 
-  memset(&prefix[0], 0, sizeof(prefix));
-  memset(&data[0], 0, sizeof(data));
+  memset(prefix, 0, sizeof(prefix));
+  memset(data, 0, sizeof(data));
 
   if (!bcrypto_cash32_deserialize(&err, prefix, data,
                                     &data_len, default_prefix, addr)) {
     return Nan::ThrowError(bcrypto_cash32_strerror(err));
   }
 
-  prefix_len = strlen(&prefix[0]);
+  prefix_len = strlen(prefix);
 
   v8::Local<v8::Array> ret = Nan::New<v8::Array>();
 
   Nan::Set(ret, 0,
-    Nan::New<v8::String>(&prefix[0], prefix_len).ToLocalChecked());
+    Nan::New<v8::String>(prefix, prefix_len).ToLocalChecked());
 
   Nan::Set(ret, 1,
-    Nan::CopyBuffer((char *)&data[0], data_len).ToLocalChecked());
+    Nan::CopyBuffer((char *)data, data_len).ToLocalChecked());
 
   info.GetReturnValue().Set(ret);
 }
@@ -206,17 +206,17 @@ NAN_METHOD(BCash32::Encode) {
   char output[197];
   size_t output_len = 0;
 
-  memset(&output[0], 0, sizeof(output));
+  memset(output, 0, sizeof(output));
 
   bcrypto_cash32_error err = BCRYPTO_CASH32_ERR_NULL;
 
   if (!bcrypto_cash32_encode(&err, output, prefix, type, hash, hash_len))
     return Nan::ThrowError(bcrypto_cash32_strerror(err));
 
-  output_len = strlen(&output[0]);
+  output_len = strlen(output);
 
   info.GetReturnValue().Set(
-    Nan::New<v8::String>(&output[0], output_len).ToLocalChecked());
+    Nan::New<v8::String>(output, output_len).ToLocalChecked());
 }
 
 NAN_METHOD(BCash32::Decode) {
@@ -241,8 +241,8 @@ NAN_METHOD(BCash32::Decode) {
   char prefix[84];
   size_t prefix_len;
 
-  memset(&hash[0], 0, sizeof(hash));
-  memset(&prefix[0], 0, sizeof(prefix));
+  memset(hash, 0, sizeof(hash));
+  memset(prefix, 0, sizeof(prefix));
 
   bcrypto_cash32_error err = BCRYPTO_CASH32_ERR_NULL;
 
@@ -251,17 +251,17 @@ NAN_METHOD(BCash32::Decode) {
     return Nan::ThrowError(bcrypto_cash32_strerror(err));
   }
 
-  prefix_len = strlen(&prefix[0]);
+  prefix_len = strlen(prefix);
 
   v8::Local<v8::Array> ret = Nan::New<v8::Array>();
 
   Nan::Set(ret, 0,
-    Nan::New<v8::String>(&prefix[0], prefix_len).ToLocalChecked());
+    Nan::New<v8::String>(prefix, prefix_len).ToLocalChecked());
 
   Nan::Set(ret, 1, Nan::New<v8::Number>(type));
 
   Nan::Set(ret, 2,
-    Nan::CopyBuffer((char *)&hash[0], hash_len).ToLocalChecked());
+    Nan::CopyBuffer((char *)hash, hash_len).ToLocalChecked());
 
   info.GetReturnValue().Set(ret);
 }

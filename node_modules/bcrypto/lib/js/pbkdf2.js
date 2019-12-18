@@ -14,7 +14,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('../internal/assert');
 const crypto = global.crypto || global.msCrypto || {};
 const subtle = crypto.subtle || {};
 

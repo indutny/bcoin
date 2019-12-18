@@ -4,7 +4,7 @@
 static Nan::Persistent<v8::FunctionTemplate> keccak_constructor;
 
 BKeccak::BKeccak() {
-  memset(&ctx, 0, sizeof(bcrypto_keccak_ctx));
+  memset(&ctx, 0, sizeof(keccak_t));
   started = false;
 }
 
@@ -57,9 +57,12 @@ NAN_METHOD(BKeccak::Init) {
     bits = Nan::To<uint32_t>(info[0]).FromJust();
   }
 
-  if (!bcrypto_keccak_init(&keccak->ctx, bits))
+  size_t rate = 1600 - bits * 2;
+
+  if (bits < 128 || bits > 512 || (rate & 63) != 0)
     return Nan::ThrowError("Could not initialize context.");
 
+  keccak_init(&keccak->ctx, bits);
   keccak->started = true;
 
   info.GetReturnValue().Set(info.This());
@@ -82,7 +85,7 @@ NAN_METHOD(BKeccak::Update) {
   const uint8_t *in = (const uint8_t *)node::Buffer::Data(buf);
   size_t inlen = node::Buffer::Length(buf);
 
-  bcrypto_keccak_update(&keccak->ctx, in, inlen);
+  keccak_update(&keccak->ctx, in, inlen);
 
   info.GetReturnValue().Set(info.This());
 }
@@ -111,11 +114,15 @@ NAN_METHOD(BKeccak::Final) {
     outlen = (size_t)Nan::To<uint32_t>(info[1]).FromJust();
   }
 
-  uint8_t out[200];
+  if (outlen == 0)
+    outlen = 100 - (keccak->ctx.bs >> 1);
 
-  if (!bcrypto_keccak_final(&keccak->ctx, out, &outlen, outlen, pad))
+  if (outlen >= keccak->ctx.bs)
     return Nan::ThrowError("Could not finalize context.");
 
+  uint8_t out[200];
+
+  keccak_final(&keccak->ctx, out, pad, outlen);
   keccak->started = false;
 
   info.GetReturnValue().Set(
@@ -161,16 +168,23 @@ NAN_METHOD(BKeccak::Digest) {
     outlen = (size_t)Nan::To<uint32_t>(info[3]).FromJust();
   }
 
-  bcrypto_keccak_ctx ctx;
+  keccak_t ctx;
   uint8_t out[200];
+  size_t rate = 1600 - bits * 2;
+  size_t bs = rate >> 3;
 
-  if (!bcrypto_keccak_init(&ctx, bits))
+  if (bits < 128 || bits > 512 || (rate & 63) != 0)
     return Nan::ThrowError("Could not initialize context.");
 
-  bcrypto_keccak_update(&ctx, in, inlen);
+  if (outlen == 0)
+    outlen = 100 - (bs >> 1);
 
-  if (!bcrypto_keccak_final(&ctx, out, &outlen, outlen, pad))
+  if (outlen >= bs)
     return Nan::ThrowError("Could not finalize context.");
+
+  keccak_init(&ctx, bits);
+  keccak_update(&ctx, in, inlen);
+  keccak_final(&ctx, out, pad, outlen);
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], outlen).ToLocalChecked());
@@ -231,17 +245,24 @@ NAN_METHOD(BKeccak::Root) {
       return Nan::ThrowRangeError("Invalid node sizes.");
   }
 
-  bcrypto_keccak_ctx ctx;
+  keccak_t ctx;
   uint8_t out[200];
+  size_t rate = 1600 - bits * 2;
+  size_t bs = rate >> 3;
 
-  if (!bcrypto_keccak_init(&ctx, bits))
+  if (bits < 128 || bits > 512 || (rate & 63) != 0)
     return Nan::ThrowError("Could not initialize context.");
 
-  bcrypto_keccak_update(&ctx, left, leftlen);
-  bcrypto_keccak_update(&ctx, right, rightlen);
+  if (outlen == 0)
+    outlen = 100 - (bs >> 1);
 
-  if (!bcrypto_keccak_final(&ctx, out, &outlen, outlen, pad))
+  if (outlen >= bs)
     return Nan::ThrowError("Could not finalize context.");
+
+  keccak_init(&ctx, bits);
+  keccak_update(&ctx, left, leftlen);
+  keccak_update(&ctx, right, rightlen);
+  keccak_final(&ctx, out, pad, outlen);
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], outlen).ToLocalChecked());
@@ -307,18 +328,25 @@ NAN_METHOD(BKeccak::Multi) {
     outlen = (size_t)Nan::To<uint32_t>(info[5]).FromJust();
   }
 
-  bcrypto_keccak_ctx ctx;
+  keccak_t ctx;
   uint8_t out[200];
+  size_t rate = 1600 - bits * 2;
+  size_t bs = rate >> 3;
 
-  if (!bcrypto_keccak_init(&ctx, bits))
+  if (bits < 128 || bits > 512 || (rate & 63) != 0)
     return Nan::ThrowError("Could not initialize context.");
 
-  bcrypto_keccak_update(&ctx, x, xlen);
-  bcrypto_keccak_update(&ctx, y, ylen);
-  bcrypto_keccak_update(&ctx, z, zlen);
+  if (outlen == 0)
+    outlen = 100 - (bs >> 1);
 
-  if (!bcrypto_keccak_final(&ctx, out, &outlen, outlen, pad))
+  if (outlen >= bs)
     return Nan::ThrowError("Could not finalize context.");
+
+  keccak_init(&ctx, bits);
+  keccak_update(&ctx, x, xlen);
+  keccak_update(&ctx, y, ylen);
+  keccak_update(&ctx, z, zlen);
+  keccak_final(&ctx, out, pad, outlen);
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], outlen).ToLocalChecked());

@@ -84,16 +84,13 @@ cash32_encoded_size(size_t bytes, size_t *encoded_size) {
 }
 
 int
-bcrypto_cash32_serialize(
-  bcrypto_cash32_error *err,
-  char *output,
-  const char *prefix,
-  const uint8_t *data,
-  size_t data_len
-) {
+bcrypto_cash32_serialize(bcrypto_cash32_error *err,
+                         char *output,
+                         const char *prefix,
+                         const uint8_t *data,
+                         size_t data_len) {
   uint64_t chk = 1;
   size_t i = 0;
-
   int have_lower = 0;
   int have_upper = 0;
 
@@ -115,7 +112,7 @@ bcrypto_cash32_serialize(
     chk = polymod_step(chk);
     chk ^= (prefix[i] & 0x1f);
 
-    // Lowercase prefix.
+    /* Lowercase prefix. */
     if (prefix[i] >= 65 && prefix[i] <= 90)
       *(output++) = prefix[i] + 32;
     else
@@ -161,22 +158,22 @@ bcrypto_cash32_serialize(
 }
 
 int
-bcrypto_cash32_deserialize(
-  bcrypto_cash32_error *err,
-  char *prefix,
-  uint8_t *data,
-  size_t *data_len,
-  const char *default_prefix,
-  const char *input
-) {
+bcrypto_cash32_deserialize(bcrypto_cash32_error *err,
+                           char *prefix,
+                           uint8_t *data,
+                           size_t *data_len,
+                           const char *default_prefix,
+                           const char *input) {
   uint64_t chk = 1;
   size_t input_len = strlen(input);
   size_t prefix_len = 0;
-
   int have_lower = 0;
   int have_upper = 0;
+  int has_prefix, valid_checksum;
+  const char *prefix_input;
+  size_t i, j, prefix_input_len, payload_len;
 
-  if (input_len < 8 || input_len > 196) { // 83 + 1 + 112
+  if (input_len < 8 || input_len > 196) { /* 83 + 1 + 112 */
     *err = BCRYPTO_CASH32_ERR_LENGTH;
     return 0;
   }
@@ -189,10 +186,9 @@ bcrypto_cash32_deserialize(
     }
   }
 
-  const int has_prefix = !(prefix_len == input_len);
-
-  const char *prefix_input = has_prefix ? input : default_prefix;
-  size_t prefix_input_len = has_prefix ? prefix_len : strlen(default_prefix);
+  has_prefix = !(prefix_len == input_len);
+  prefix_input = has_prefix ? input : default_prefix;
+  prefix_input_len = has_prefix ? prefix_len : strlen(default_prefix);
 
   *data_len = has_prefix ? input_len - (1 + prefix_len) : input_len;
 
@@ -208,7 +204,7 @@ bcrypto_cash32_deserialize(
 
   *data_len -= 8;
 
-  for (size_t i = 0; i < prefix_input_len; i++) {
+  for (i = 0; i < prefix_input_len; i++) {
     int ch = prefix_input[i];
 
     if (ch < 33 || ch > 126) {
@@ -233,8 +229,8 @@ bcrypto_cash32_deserialize(
 
   chk = polymod_step(chk);
 
-  size_t j = has_prefix ? prefix_len + 1 : 0;
-  size_t payload_len = 0;
+  j = has_prefix ? prefix_len + 1 : 0;
+  payload_len = 0;
 
   while (j < input_len) {
     int v = (input[j] & 0xff80) ? -1 : TABLE[(int)input[j]];
@@ -281,7 +277,7 @@ bcrypto_cash32_deserialize(
     return 0;
   }
 
-  int valid_checksum = (chk == 1) && (strcmp(prefix, default_prefix) == 0);
+  valid_checksum = (chk == 1) && (strcmp(prefix, default_prefix) == 0);
 
   if (!valid_checksum)
     *err = BCRYPTO_CASH32_ERR_CHECKSUM;
@@ -290,17 +286,15 @@ bcrypto_cash32_deserialize(
 }
 
 int
-bcrypto_cash32_is(
-  bcrypto_cash32_error *err,
-  const char *default_prefix,
-  const char *addr
-) {
+bcrypto_cash32_is(bcrypto_cash32_error *err,
+                  const char *default_prefix,
+                  const char *addr) {
   char prefix[84];
   uint8_t data[188];
   size_t data_len = 0;
 
-  memset(&prefix[0], 0, sizeof(prefix));
-  memset(&data[0], 0, sizeof(data));
+  memset(prefix, 0x00, sizeof(prefix));
+  memset(data, 0x00, sizeof(data));
 
   if (!bcrypto_cash32_deserialize(err, prefix, data,
                                   &data_len, default_prefix, addr)) {
@@ -311,16 +305,14 @@ bcrypto_cash32_is(
 }
 
 int
-bcrypto_cash32_convert_bits(
-  bcrypto_cash32_error *err,
-  uint8_t *out,
-  size_t *outlen,
-  int outbits,
-  const uint8_t *in,
-  size_t inlen,
-  int inbits,
-  int pad
-) {
+bcrypto_cash32_convert_bits(bcrypto_cash32_error *err,
+                            uint8_t *out,
+                            size_t *outlen,
+                            int outbits,
+                            const uint8_t *in,
+                            size_t inlen,
+                            int inbits,
+                            int pad) {
   uint32_t val = 0;
   int bits = 0;
   uint32_t maxv = (((uint32_t)1) << outbits) - 1;
@@ -353,17 +345,18 @@ bcrypto_cash32_convert_bits(
 }
 
 int
-bcrypto_cash32_encode(
-  bcrypto_cash32_error *err,
-  char *output,
-  const char *prefix,
-  int type,
-  const uint8_t *hash,
-  size_t hash_len
-) {
+bcrypto_cash32_encode(bcrypto_cash32_error *err,
+                      char *output,
+                      const char *prefix,
+                      int type,
+                      const uint8_t *hash,
+                      size_t hash_len) {
   size_t encoded_size = 0;
+  uint8_t data[65];
+  uint8_t converted[(65 * 8 + 4) / 5 + 1]; /* 105 */
+  size_t converted_len = 0;
 
-  // There are 4 bits available for the version (2 ^ 4 = 16)
+  /* There are 4 bits available for the version (2 ^ 4 = 16) */
   if (type < 0 || type > 15) {
     *err = BCRYPTO_CASH32_ERR_TYPE;
     return 0;
@@ -374,16 +367,10 @@ bcrypto_cash32_encode(
     return 0;
   }
 
-  uint8_t version_byte = type << 3 | (uint8_t)encoded_size;
+  data[0] = type << 3 | (uint8_t)encoded_size;
+  memcpy(data + 1, hash, hash_len);
 
-  uint8_t data[65];
-  data[0] = version_byte;
-  memcpy(&data[1], hash, hash_len);
-
-  uint8_t converted[(65 * 8 + 4) / 5 + 1]; // 105
-  size_t converted_len = 0;
-
-  memset(&converted[0], 0, sizeof(converted));
+  memset(converted, 0x00, sizeof(converted));
 
   if (!bcrypto_cash32_convert_bits(err, converted, &converted_len,
                                    5, data, hash_len + 1, 8, 1)) {
@@ -395,44 +382,42 @@ bcrypto_cash32_encode(
 }
 
 int
-bcrypto_cash32_decode(
-  bcrypto_cash32_error *err,
-  int *type,
-  uint8_t *hash,
-  size_t *hash_len,
-  char *prefix,
-  const char *default_prefix,
-  const char *addr
-) {
+bcrypto_cash32_decode(bcrypto_cash32_error *err,
+                      int *type,
+                      uint8_t *hash,
+                      size_t *hash_len,
+                      char *prefix,
+                      const char *default_prefix,
+                      const char *addr) {
   uint8_t data[188];
+  uint8_t converted[(188 * 5 + 7) / 8]; /* 118 */
+  size_t converted_len = 0;
   size_t data_len = 0;
+  size_t extrabits, last, mask, size;
 
-  memset(&data[0], 0, sizeof(data));
+  memset(data, 0x00, sizeof(data));
 
   if (!bcrypto_cash32_deserialize(err, prefix, data,
                                   &data_len, default_prefix, addr)) {
     return 0;
   }
 
-  size_t extrabits = (data_len * 5) & 7;
+  extrabits = (data_len * 5) & 7;
 
   if (extrabits >= 5) {
     *err = BCRYPTO_CASH32_ERR_PADDING;
     return 0;
   }
 
-  size_t last = (size_t)data[data_len - 1];
-  size_t mask = (1 << extrabits) - 1;
+  last = (size_t)data[data_len - 1];
+  mask = (1 << extrabits) - 1;
 
   if (last & mask) {
     *err = BCRYPTO_CASH32_ERR_NONZERO_PADDING;
     return 0;
   }
 
-  uint8_t converted[(188 * 5 + 7) / 8]; // 118
-  size_t converted_len = 0;
-
-  memset(&converted[0], 0, sizeof(converted));
+  memset(converted, 0x00, sizeof(converted));
 
   if (!bcrypto_cash32_convert_bits(err, converted, &converted_len,
                                    8, data, data_len, 5, 0)) {
@@ -446,9 +431,9 @@ bcrypto_cash32_decode(
 
   *type = (converted[0] >> 3) & 0x1f;
   *hash_len = converted_len - 1;
-  memcpy(hash, &converted[1], *hash_len);
+  memcpy(hash, converted + 1, *hash_len);
 
-  size_t size = 20 + 4 * (converted[0] & 0x03);
+  size = 20 + 4 * (converted[0] & 0x03);
 
   if (converted[0] & 0x04)
     size *= 2;
@@ -462,18 +447,16 @@ bcrypto_cash32_decode(
 }
 
 int
-bcrypto_cash32_test(
-  bcrypto_cash32_error *err,
-  const char *default_prefix,
-  const char *addr
-) {
+bcrypto_cash32_test(bcrypto_cash32_error *err,
+                    const char *default_prefix,
+                    const char *addr) {
   char prefix[84];
   uint8_t hash[64];
   size_t hash_len;
   int type = 0;
 
-  memset(&prefix[0], 0, sizeof(prefix));
-  memset(&hash[0], 0, sizeof(hash));
+  memset(prefix, 0x00, sizeof(prefix));
+  memset(hash, 0x00, sizeof(hash));
 
   if (!bcrypto_cash32_decode(err, &type, hash, &hash_len,
                              prefix, default_prefix, addr)) {

@@ -17,4 +17,4 @@ const SHAKE256 = require('../shake256');
  * Expose
  */
 
-module.exports = new EDDSA('ED448', 'X448', SHAKE256);
+module.exports = new EDDSA('ED448', 'X448', 'MONT448', SHAKE256);

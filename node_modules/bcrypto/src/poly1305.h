@@ -2,8 +2,7 @@
 #define _BCRYPTO_POLY1305_HH
 #include <node.h>
 #include <nan.h>
-
-#include "poly1305/poly1305.h"
+#include <torsion/poly1305.h>
 
 class BPoly1305 : public Nan::ObjectWrap {
 public:
@@ -13,7 +12,7 @@ public:
   BPoly1305();
   ~BPoly1305();
 
-  bcrypto_poly1305_ctx ctx;
+  poly1305_t ctx;
   bool started;
 
 private:

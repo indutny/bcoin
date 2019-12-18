@@ -3,8 +3,7 @@
 
 #include <node.h>
 #include <nan.h>
-
-#include "chacha20/chacha20.h"
+#include <torsion/chacha20.h>
 
 class BChaCha20 : public Nan::ObjectWrap {
 public:
@@ -14,7 +13,7 @@ public:
   BChaCha20();
   ~BChaCha20();
 
-  bcrypto_chacha20_ctx ctx;
+  chacha20_t ctx;
   bool started;
 
 private:

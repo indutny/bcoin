@@ -3,8 +3,7 @@
 
 #include <node.h>
 #include <nan.h>
-
-#include "salsa20/salsa20.h"
+#include <torsion/salsa20.h>
 
 class BSalsa20 : public Nan::ObjectWrap {
 public:
@@ -14,7 +13,7 @@ public:
   BSalsa20();
   ~BSalsa20();
 
-  bcrypto_salsa20_ctx ctx;
+  salsa20_t ctx;
   bool started;
 
 private:

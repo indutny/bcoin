@@ -7,11 +7,7 @@
 
 'use strict';
 
-try {
+if (process.env.NODE_BACKEND === 'js')
+  module.exports = require('./js/murmur3');
+else
   module.exports = require('./native/murmur3');
-} catch (e) {
-  if (process.env.NODE_BACKEND === 'js')
-    module.exports = require('./js/murmur3');
-  else
-    module.exports = require('./node/murmur3');
-}

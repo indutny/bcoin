@@ -6,8 +6,7 @@
 
 'use strict';
 
-try {
-  module.exports = require('../native/bech32');
-} catch (e) {
+if (process.env.NODE_BACKEND === 'js')
   module.exports = require('../js/bech32');
-}
+else
+  module.exports = require('../native/bech32');

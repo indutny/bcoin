@@ -2,29 +2,46 @@
  * hash256.js - hash256 implementation for bcrypto
  * Copyright (c) 2016-2019, Christopher Jeffrey (MIT License).
  * https://github.com/bcoin-org/bcrypto
- * Parts of this software based on hash.js.
  */
 
 'use strict';
 
-const {Hash256} = require('./binding');
-const HMAC = require('../internal/hmac');
+const binding = require('./binding');
+const {Hash, HMAC, hashes} = binding;
 
 /*
  * Hash256
  */
 
-Hash256.hash = function hash() {
-  return new Hash256();
-};
+class Hash256 extends Hash {
+  constructor() {
+    super(hashes.HASH256);
+  }
 
-Hash256.hmac = function hmac() {
-  return new HMAC(Hash256, 64);
-};
+  static hash() {
+    return new Hash256();
+  }
 
-Hash256.mac = function mac(data, key) {
-  return Hash256.hmac().init(key).update(data).final();
-};
+  static hmac() {
+    return new HMAC(hashes.HASH256);
+  }
+
+  static digest(data) {
+    return Hash.digest(hashes.HASH256, data);
+  }
+
+  static root(left, right) {
+    return Hash.root(hashes.HASH256, left, right);
+  }
+
+  static multi(x, y, z) {
+    return Hash.multi(hashes.HASH256, x, y, z);
+  }
+
+  static mac(data, key) {
+    return HMAC.digest(hashes.HASH256, data, key);
+  }
+}
 
 /*
  * Static

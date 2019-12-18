@@ -9,7 +9,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('../internal/assert');
 const {PEMBlock} = require('./pem');
 const cipher = require('../cipher');
 const random = require('../random');

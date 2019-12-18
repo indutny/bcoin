@@ -47,7 +47,7 @@ NAN_METHOD(BBech32::Serialize) {
   if (!bcrypto_bech32_serialize(output, hrp, data, data_len))
     return Nan::ThrowError("Bech32 encoding failed.");
 
-  output_len = strlen(&output[0]);
+  output_len = strlen(output);
 
   info.GetReturnValue().Set(
     Nan::New<v8::String>(output, output_len).ToLocalChecked());
@@ -71,15 +71,15 @@ NAN_METHOD(BBech32::Deserialize) {
   if (!bcrypto_bech32_deserialize(hrp, data, &data_len, input))
     return Nan::ThrowError("Invalid bech32 string.");
 
-  hrp_len = strlen(&hrp[0]);
+  hrp_len = strlen(hrp);
 
   v8::Local<v8::Array> ret = Nan::New<v8::Array>();
 
   Nan::Set(ret, 0,
-    Nan::New<v8::String>(&hrp[0], hrp_len).ToLocalChecked());
+    Nan::New<v8::String>(hrp, hrp_len).ToLocalChecked());
 
   Nan::Set(ret, 1,
-    Nan::CopyBuffer((char *)&data[0], data_len).ToLocalChecked());
+    Nan::CopyBuffer((char *)data, data_len).ToLocalChecked());
 
   info.GetReturnValue().Set(ret);
 }
@@ -177,7 +177,7 @@ NAN_METHOD(BBech32::Encode) {
   if (!bcrypto_bech32_encode(output, hrp, witver, witprog, witprog_len))
     return Nan::ThrowError("Bech32 encoding failed.");
 
-  output_len = strlen(&output[0]);
+  output_len = strlen(output);
 
   info.GetReturnValue().Set(
     Nan::New<v8::String>(output, output_len).ToLocalChecked());
@@ -202,17 +202,17 @@ NAN_METHOD(BBech32::Decode) {
   if (!bcrypto_bech32_decode(&witver, witprog, &witprog_len, hrp, addr))
     return Nan::ThrowError("Invalid bech32 string.");
 
-  hrp_len = strlen(&hrp[0]);
+  hrp_len = strlen(hrp);
 
   v8::Local<v8::Array> ret = Nan::New<v8::Array>();
 
   Nan::Set(ret, 0,
-    Nan::New<v8::String>(&hrp[0], hrp_len).ToLocalChecked());
+    Nan::New<v8::String>(hrp, hrp_len).ToLocalChecked());
 
   Nan::Set(ret, 1, Nan::New<v8::Number>(witver));
 
   Nan::Set(ret, 2,
-    Nan::CopyBuffer((char *)&witprog[0], witprog_len).ToLocalChecked());
+    Nan::CopyBuffer((char *)witprog, witprog_len).ToLocalChecked());
 
   info.GetReturnValue().Set(ret);
 }

@@ -6,11 +6,7 @@
 
 'use strict';
 
-try {
+if (process.env.NODE_BACKEND === 'js')
+  module.exports = require('./js/md4');
+else
   module.exports = require('./native/md4');
-} catch (e) {
-  if (process.env.NODE_BACKEND === 'js')
-    module.exports = require('./js/md4');
-  else
-    module.exports = require('./node/md4');
-}

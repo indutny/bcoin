@@ -6,16 +6,7 @@
 
 'use strict';
 
-try {
+if (process.env.NODE_BACKEND === 'js')
+  module.exports = require('./js/scrypt');
+else
   module.exports = require('./native/scrypt');
-} catch (e) {
-  if (process.env.NODE_BACKEND === 'js') {
-    module.exports = require('./js/scrypt');
-  } else {
-    try {
-      module.exports = require('./node/scrypt');
-    } catch (e) {
-      module.exports = require('./js/scrypt');
-    }
-  }
-}

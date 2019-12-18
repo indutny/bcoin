@@ -6,24 +6,42 @@
 
 'use strict';
 
-const {SHA256} = require('./binding');
-const HMAC = require('../internal/hmac');
+const binding = require('./binding');
+const {Hash, HMAC, hashes} = binding;
 
 /*
  * SHA256
  */
 
-SHA256.hash = function hash() {
-  return new SHA256();
-};
+class SHA256 extends Hash {
+  constructor() {
+    super(hashes.SHA256);
+  }
 
-SHA256.hmac = function hmac() {
-  return new HMAC(SHA256, 64);
-};
+  static hash() {
+    return new SHA256();
+  }
 
-SHA256.mac = function mac(data, key) {
-  return SHA256.hmac().init(key).update(data).final();
-};
+  static hmac() {
+    return new HMAC(hashes.SHA256);
+  }
+
+  static digest(data) {
+    return Hash.digest(hashes.SHA256, data);
+  }
+
+  static root(left, right) {
+    return Hash.root(hashes.SHA256, left, right);
+  }
+
+  static multi(x, y, z) {
+    return Hash.multi(hashes.SHA256, x, y, z);
+  }
+
+  static mac(data, key) {
+    return HMAC.digest(hashes.SHA256, data, key);
+  }
+}
 
 /*
  * Static

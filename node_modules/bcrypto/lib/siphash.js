@@ -6,11 +6,7 @@
 
 'use strict';
 
-try {
+if (process.env.NODE_BACKEND === 'js')
+  module.exports = require('./js/siphash');
+else
   module.exports = require('./native/siphash');
-} catch (e) {
-  if (process.env.NODE_BACKEND === 'js')
-    module.exports = require('./js/siphash');
-  else
-    module.exports = require('./node/siphash');
-}

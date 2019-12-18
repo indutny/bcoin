@@ -6,7 +6,8 @@
 
 'use strict';
 
-const cleanse = require('./binding').cleanse;
+const backend = require('./binding').util;
+const cleanse = backend.cleanse;
 
 cleanse.native = 2;
 

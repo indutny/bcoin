@@ -64,16 +64,16 @@ secp256k1_pubkey_from_hash(const secp256k1_context *ctx,
  *  Out:     bytes64: pointer to a 64-byte array to be filled by the function.
  *  In:      pubkey:  pointer to a secp256k1_pubkey containing an
  *                    initialized public key.
- *           seed64:  pointer to a 64-byte random seed.
+ *           entropy: pointer to a 32-byte random seed.
  */
 SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int
 secp256k1_pubkey_to_hash(const secp256k1_context *ctx,
                          unsigned char *bytes64,
                          const secp256k1_pubkey *pubkey,
-                         const unsigned char *seed64) SECP256K1_ARG_NONNULL(1)
-                                                      SECP256K1_ARG_NONNULL(2)
-                                                      SECP256K1_ARG_NONNULL(3)
-                                                      SECP256K1_ARG_NONNULL(4);
+                         const unsigned char *entropy) SECP256K1_ARG_NONNULL(1)
+                                                       SECP256K1_ARG_NONNULL(2)
+                                                       SECP256K1_ARG_NONNULL(3)
+                                                       SECP256K1_ARG_NONNULL(4);
 
 #ifdef __cplusplus
 }

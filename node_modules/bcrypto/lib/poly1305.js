@@ -6,8 +6,7 @@
 
 'use strict';
 
-try {
-  module.exports = require('./native/poly1305');
-} catch (e) {
+if (process.env.NODE_BACKEND === 'js')
   module.exports = require('./js/poly1305');
-}
+else
+  module.exports = require('./native/poly1305');

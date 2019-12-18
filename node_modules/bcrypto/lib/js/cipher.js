@@ -6,7 +6,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('../internal/assert');
 const ciphers = require('../internal/ciphers');
 const modes = require('./ciphers/modes');
 const AES = require('./ciphers/aes');

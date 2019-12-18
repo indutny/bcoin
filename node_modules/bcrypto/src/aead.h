@@ -3,8 +3,7 @@
 
 #include <node.h>
 #include <nan.h>
-
-#include "aead/aead.h"
+#include <torsion/aead.h>
 
 class BAEAD : public Nan::ObjectWrap {
 public:
@@ -14,7 +13,7 @@ public:
   BAEAD();
   ~BAEAD();
 
-  bcrypto_aead_ctx ctx;
+  aead_t ctx;
 
 private:
   static NAN_METHOD(Init);

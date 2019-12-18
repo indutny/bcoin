@@ -4,7 +4,7 @@
 static Nan::Persistent<v8::FunctionTemplate> blake2s_constructor;
 
 BBLAKE2s::BBLAKE2s() {
-  memset(&ctx, 0, sizeof(bcrypto_blake2s_ctx));
+  memset(&ctx, 0, sizeof(blake2s_t));
   started = false;
 }
 
@@ -56,7 +56,7 @@ NAN_METHOD(BBLAKE2s::Init) {
 
     outlen = Nan::To<uint32_t>(info[0]).FromJust();
 
-    if (outlen == 0 || outlen > BCRYPTO_BLAKE2S_OUTBYTES)
+    if (outlen == 0 || outlen > 32)
       return Nan::ThrowRangeError("Invalid output length.");
   }
 
@@ -72,18 +72,11 @@ NAN_METHOD(BBLAKE2s::Init) {
     key = (const uint8_t *)node::Buffer::Data(buf);
     keylen = node::Buffer::Length(buf);
 
-    if (keylen > BCRYPTO_BLAKE2S_OUTBYTES)
+    if (keylen > 32)
       return Nan::ThrowRangeError("Invalid key size.");
   }
 
-  if (keylen > 0) {
-    if (bcrypto_blake2s_init_key(&blake->ctx, outlen, key, keylen) < 0)
-      return Nan::ThrowError("Could not initialize context.");
-  } else {
-    if (bcrypto_blake2s_init(&blake->ctx, outlen) < 0)
-      return Nan::ThrowError("Could not initialize context.");
-  }
-
+  blake2s_init(&blake->ctx, outlen, key, keylen);
   blake->started = true;
 
   info.GetReturnValue().Set(info.This());
@@ -106,7 +99,7 @@ NAN_METHOD(BBLAKE2s::Update) {
   const uint8_t *in = (const uint8_t *)node::Buffer::Data(buf);
   size_t inlen = node::Buffer::Length(buf);
 
-  bcrypto_blake2s_update(&blake->ctx, in, inlen);
+  blake2s_update(&blake->ctx, in, inlen);
 
   info.GetReturnValue().Set(info.This());
 }
@@ -118,9 +111,9 @@ NAN_METHOD(BBLAKE2s::Final) {
     return Nan::ThrowError("Context is not initialized.");
 
   uint32_t outlen = blake->ctx.outlen;
-  uint8_t out[BCRYPTO_BLAKE2S_OUTBYTES];
+  uint8_t out[32];
 
-  bcrypto_blake2s_final(&blake->ctx, &out[0], outlen);
+  blake2s_final(&blake->ctx, &out[0]);
   blake->started = false;
 
   info.GetReturnValue().Set(
@@ -149,7 +142,7 @@ NAN_METHOD(BBLAKE2s::Digest) {
 
     outlen = Nan::To<uint32_t>(info[1]).FromJust();
 
-    if (outlen == 0 || outlen > BCRYPTO_BLAKE2S_OUTBYTES)
+    if (outlen == 0 || outlen > 32)
       return Nan::ThrowRangeError("Invalid output length.");
   }
 
@@ -162,23 +155,16 @@ NAN_METHOD(BBLAKE2s::Digest) {
     key = (const uint8_t *)node::Buffer::Data(kbuf);
     keylen = node::Buffer::Length(kbuf);
 
-    if (keylen > BCRYPTO_BLAKE2S_OUTBYTES)
+    if (keylen > 32)
       return Nan::ThrowRangeError("Invalid key size.");
   }
 
-  bcrypto_blake2s_ctx ctx;
-  uint8_t out[BCRYPTO_BLAKE2S_OUTBYTES];
+  blake2s_t ctx;
+  uint8_t out[32];
 
-  if (keylen > 0) {
-    if (bcrypto_blake2s_init_key(&ctx, outlen, key, keylen) < 0)
-      return Nan::ThrowError("Could not initialize context.");
-  } else {
-    if (bcrypto_blake2s_init(&ctx, outlen) < 0)
-      return Nan::ThrowError("Could not initialize context.");
-  }
-
-  bcrypto_blake2s_update(&ctx, in, inlen);
-  bcrypto_blake2s_final(&ctx, &out[0], outlen);
+  blake2s_init(&ctx, outlen, key, keylen);
+  blake2s_update(&ctx, in, inlen);
+  blake2s_final(&ctx, &out[0]);
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], outlen).ToLocalChecked());
@@ -214,7 +200,7 @@ NAN_METHOD(BBLAKE2s::Root) {
 
     outlen = Nan::To<uint32_t>(info[2]).FromJust();
 
-    if (outlen == 0 || outlen > BCRYPTO_BLAKE2S_OUTBYTES)
+    if (outlen == 0 || outlen > 32)
       return Nan::ThrowRangeError("Invalid output length.");
   }
 
@@ -227,27 +213,20 @@ NAN_METHOD(BBLAKE2s::Root) {
     key = (const uint8_t *)node::Buffer::Data(kbuf);
     keylen = node::Buffer::Length(kbuf);
 
-    if (keylen > BCRYPTO_BLAKE2S_OUTBYTES)
+    if (keylen > 32)
       return Nan::ThrowRangeError("Invalid key size.");
   }
 
   if (leftlen != outlen || rightlen != outlen)
     return Nan::ThrowRangeError("Invalid node sizes.");
 
-  bcrypto_blake2s_ctx ctx;
-  uint8_t out[BCRYPTO_BLAKE2S_OUTBYTES];
+  blake2s_t ctx;
+  uint8_t out[32];
 
-  if (keylen > 0) {
-    if (bcrypto_blake2s_init_key(&ctx, outlen, key, keylen) < 0)
-      return Nan::ThrowError("Could not initialize context.");
-  } else {
-    if (bcrypto_blake2s_init(&ctx, outlen) < 0)
-      return Nan::ThrowError("Could not initialize context.");
-  }
-
-  bcrypto_blake2s_update(&ctx, left, leftlen);
-  bcrypto_blake2s_update(&ctx, right, rightlen);
-  bcrypto_blake2s_final(&ctx, &out[0], outlen);
+  blake2s_init(&ctx, outlen, key, keylen);
+  blake2s_update(&ctx, left, leftlen);
+  blake2s_update(&ctx, right, rightlen);
+  blake2s_final(&ctx, &out[0]);
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], outlen).ToLocalChecked());
@@ -296,7 +275,7 @@ NAN_METHOD(BBLAKE2s::Multi) {
 
     outlen = Nan::To<uint32_t>(info[3]).FromJust();
 
-    if (outlen == 0 || outlen > BCRYPTO_BLAKE2S_OUTBYTES)
+    if (outlen == 0 || outlen > 32)
       return Nan::ThrowRangeError("Invalid output length.");
   }
 
@@ -309,26 +288,18 @@ NAN_METHOD(BBLAKE2s::Multi) {
     key = (const uint8_t *)node::Buffer::Data(kbuf);
     keylen = node::Buffer::Length(kbuf);
 
-    if (keylen > BCRYPTO_BLAKE2S_OUTBYTES)
+    if (keylen > 32)
       return Nan::ThrowRangeError("Invalid key size.");
   }
 
-  bcrypto_blake2s_ctx ctx;
-  uint8_t out[BCRYPTO_BLAKE2S_OUTBYTES];
+  blake2s_t ctx;
+  uint8_t out[32];
 
-  if (keylen > 0) {
-    if (bcrypto_blake2s_init_key(&ctx, outlen, key, keylen) < 0)
-      return Nan::ThrowError("Could not initialize context.");
-  } else {
-    if (bcrypto_blake2s_init(&ctx, outlen) < 0)
-      return Nan::ThrowError("Could not initialize context.");
-  }
-
-  bcrypto_blake2s_update(&ctx, x, xlen);
-  bcrypto_blake2s_update(&ctx, y, ylen);
-  bcrypto_blake2s_update(&ctx, z, zlen);
-
-  bcrypto_blake2s_final(&ctx, &out[0], outlen);
+  blake2s_init(&ctx, outlen, key, keylen);
+  blake2s_update(&ctx, x, xlen);
+  blake2s_update(&ctx, y, ylen);
+  blake2s_update(&ctx, z, zlen);
+  blake2s_final(&ctx, &out[0]);
 
   info.GetReturnValue().Set(
     Nan::CopyBuffer((char *)&out[0], outlen).ToLocalChecked());

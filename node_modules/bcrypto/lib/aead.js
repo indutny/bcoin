@@ -6,8 +6,7 @@
 
 'use strict';
 
-try {
-  module.exports = require('./native/aead');
-} catch (e) {
+if (process.env.NODE_BACKEND === 'js')
   module.exports = require('./js/aead');
-}
+else
+  module.exports = require('./native/aead');

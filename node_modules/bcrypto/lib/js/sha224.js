@@ -15,7 +15,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('../internal/assert');
 const SHA256 = require('./sha256');
 const HMAC = require('../internal/hmac');
 

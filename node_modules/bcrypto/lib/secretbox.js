@@ -20,7 +20,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('./internal/assert');
 const Salsa20 = require('./salsa20');
 const Poly1305 = require('./poly1305');
 

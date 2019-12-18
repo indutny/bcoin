@@ -6,11 +6,7 @@
 
 'use strict';
 
-try {
+if (process.env.NODE_BACKEND === 'js')
+  module.exports = require('./js/hash256');
+else
   module.exports = require('./native/hash256');
-} catch (e) {
-  if (process.env.NODE_BACKEND === 'js')
-    module.exports = require('./js/hash256');
-  else
-    module.exports = require('./node/hash256');
-}

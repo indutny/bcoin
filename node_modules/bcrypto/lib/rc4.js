@@ -18,7 +18,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('./internal/assert');
 
 /**
  * RC4

@@ -7,8 +7,7 @@
 
 'use strict';
 
-try {
-  module.exports = require('./native/secp256k1');
-} catch (e) {
+if (process.env.NODE_BACKEND === 'js')
   module.exports = require('./js/secp256k1');
-}
+else
+  module.exports = require('./native/secp256k1');

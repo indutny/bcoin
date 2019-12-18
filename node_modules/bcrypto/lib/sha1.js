@@ -6,11 +6,7 @@
 
 'use strict';
 
-try {
+if (process.env.NODE_BACKEND === 'js')
+  module.exports = require('./js/sha1');
+else
   module.exports = require('./native/sha1');
-} catch (e) {
-  if (process.env.NODE_BACKEND === 'js')
-    module.exports = require('./js/sha1');
-  else
-    module.exports = require('./node/sha1');
-}

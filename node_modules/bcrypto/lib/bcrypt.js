@@ -20,7 +20,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('./internal/assert');
 const SHA512 = require('./sha512');
 const Blowfish = require('./js/ciphers/blowfish');
 

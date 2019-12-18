@@ -6,24 +6,42 @@
 
 'use strict';
 
-const {RIPEMD160} = require('./binding');
-const HMAC = require('../internal/hmac');
+const binding = require('./binding');
+const {Hash, HMAC, hashes} = binding;
 
 /*
  * RIPEMD160
  */
 
-RIPEMD160.hash = function hash() {
-  return new RIPEMD160();
-};
+class RIPEMD160 extends Hash {
+  constructor() {
+    super(hashes.RIPEMD160);
+  }
 
-RIPEMD160.hmac = function hmac() {
-  return new HMAC(RIPEMD160, 64);
-};
+  static hash() {
+    return new RIPEMD160();
+  }
 
-RIPEMD160.mac = function mac(data, key) {
-  return RIPEMD160.hmac().init(key).update(data).final();
-};
+  static hmac() {
+    return new HMAC(hashes.RIPEMD160);
+  }
+
+  static digest(data) {
+    return Hash.digest(hashes.RIPEMD160, data);
+  }
+
+  static root(left, right) {
+    return Hash.root(hashes.RIPEMD160, left, right);
+  }
+
+  static multi(x, y, z) {
+    return Hash.multi(hashes.RIPEMD160, x, y, z);
+  }
+
+  static mac(data, key) {
+    return HMAC.digest(hashes.RIPEMD160, data, key);
+  }
+}
 
 /*
  * Static

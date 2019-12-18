@@ -6,11 +6,7 @@
 
 'use strict';
 
-try {
+if (process.env.NODE_BACKEND === 'js' && process.env.NODE_TEST === '1')
+  module.exports = require('./js/random');
+else
   module.exports = require('./native/random');
-} catch (e) {
-  if (process.env.NODE_BACKEND === 'js' && process.env.NODE_TEST === '1')
-    module.exports = require('./js/random');
-  else
-    module.exports = require('./node/random');
-}

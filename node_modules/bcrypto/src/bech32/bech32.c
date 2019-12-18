@@ -50,12 +50,10 @@ static const int8_t TABLE[128] = {
 };
 
 int
-bcrypto_bech32_serialize(
-  char *output,
-  const char *hrp,
-  const uint8_t *data,
-  size_t data_len
-) {
+bcrypto_bech32_serialize(char *output,
+                         const char *hrp,
+                         const uint8_t *data,
+                         size_t data_len) {
   uint32_t chk = 1;
   size_t i = 0;
 
@@ -101,12 +99,10 @@ bcrypto_bech32_serialize(
 }
 
 int
-bcrypto_bech32_deserialize(
-  char *hrp,
-  uint8_t *data,
-  size_t *data_len,
-  const char *input
-) {
+bcrypto_bech32_deserialize(char *hrp,
+                           uint8_t *data,
+                           size_t *data_len,
+                           const char *input) {
   uint32_t chk = 1;
   size_t i;
   size_t input_len = strlen(input);
@@ -194,15 +190,13 @@ bcrypto_bech32_is(const char *str) {
 }
 
 int
-bcrypto_bech32_convert_bits(
-  uint8_t *out,
-  size_t *outlen,
-  int outbits,
-  const uint8_t *in,
-  size_t inlen,
-  int inbits,
-  int pad
-) {
+bcrypto_bech32_convert_bits(uint8_t *out,
+                            size_t *outlen,
+                            int outbits,
+                            const uint8_t *in,
+                            size_t inlen,
+                            int inbits,
+                            int pad) {
   uint32_t val = 0;
   int bits = 0;
   uint32_t maxv = (((uint32_t)1) << outbits) - 1;
@@ -227,13 +221,11 @@ bcrypto_bech32_convert_bits(
 }
 
 int
-bcrypto_bech32_encode(
-  char *output,
-  const char *hrp,
-  int witver,
-  const uint8_t *witprog,
-  size_t witprog_len
-) {
+bcrypto_bech32_encode(char *output,
+                      const char *hrp,
+                      int witver,
+                      const uint8_t *witprog,
+                      size_t witprog_len) {
   uint8_t data[65];
   size_t datalen = 0;
 
@@ -256,13 +248,11 @@ bcrypto_bech32_encode(
 }
 
 int
-bcrypto_bech32_decode(
-  int *witver,
-  uint8_t *witdata,
-  size_t *witdata_len,
-  char *hrp,
-  const char *addr
-) {
+bcrypto_bech32_decode(int *witver,
+                      uint8_t *witdata,
+                      size_t *witdata_len,
+                      char *hrp,
+                      const char *addr) {
   uint8_t data[84];
   size_t data_len;
 

@@ -9,7 +9,7 @@
 
 'use strict';
 
-const assert = require('bsert');
+const assert = require('../internal/assert');
 const isBrowser = Buffer.alloc(0)._isBuffer === true;
 
 /*
