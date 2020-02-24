@@ -291,10 +291,7 @@ describe('Taproot', function() {
 
       // Add coins for each input
       const view = new CoinView();
-      let script;
       for (let i = 0; i < tx.inputs.length; i++) {
-        script = test.inputs[i].script;
-
         const key = tx.inputs[i].prevout.toKey();
         const utxo = UTXOs[key.toString('hex')];
         const coin = Coin.fromKey(key);
@@ -305,20 +302,19 @@ describe('Taproot', function() {
       }
 
       it(name, () => {
-        // Skip script spends for now
-        if (script)
-          this.skip();
-
         // Verify standardness (mempool)
         const isStandard =
           tx.checkStandard()[0]
-          && tx.verify(view, standardFlags)
           && tx.hasStandardInputs(view)
-          && tx.hasStandardWitness(view);
-        assert.strictEqual(standard, isStandard);
+          && tx.hasStandardWitness(view)
+          && tx.verify(view, standardFlags);
+        assert.strictEqual(standard, isStandard, 'Standardness rules failure.');
 
         // Verify mandatoryness (block)
-        assert.strictEqual(mandatory, tx.verify(view, mandatoryFlags));
+        assert.strictEqual(
+          mandatory,
+          tx.verify(view, mandatoryFlags),
+          'Mandatory rules failure.');
       });
     };
   });
