@@ -443,6 +443,92 @@ describe('Net', function() {
       check(pkt);
     });
 
+    it('getcfcheckpt (BIP157)', () => {
+      const check = (pkt) => {
+        assert.equal(pkt.cmd, 'getcfcheckpt');
+        assert.equal(pkt.type, packets.types.GETCFCHECKPT);
+      };
+
+      const hash = Buffer.alloc(32, 0x00);
+      let pkt = new packets.GetCFCheckPtPacket(hash, 0);
+      check(pkt);
+
+      pkt = packets.GetCFCheckPtPacket.fromRaw(pkt.toRaw());
+      check(pkt);
+    });
+
+    it('cfcheckpt (BIP157)', () => {
+      const check = (pkt) => {
+        assert.equal(pkt.cmd, 'cfcheckpt');
+        assert.equal(pkt.type, packets.types.CFCHECKPT);
+      };
+
+      const hash = Buffer.alloc(32, 0x00);
+      const data = Buffer.alloc(32, 0x00);
+      let pkt = new packets.CFCheckPtPacket(hash, 0, data);
+      check(pkt);
+
+      pkt = packets.CFCheckPtPacket.fromRaw(pkt.toRaw());
+      check(pkt);
+    });
+
+    it('getcfilter (BIP157)', () => {
+      const check = (pkt) => {
+        assert.equal(pkt.cmd, 'getcfilter');
+        assert.equal(pkt.type, packets.types.GETCFILTER);
+      };
+
+      const hash = Buffer.alloc(32, 0x00);
+      let pkt = new packets.GetCFilterPacket(hash, 0);
+      check(pkt);
+
+      pkt = packets.GetCFilterPacket.fromRaw(pkt.toRaw());
+      check(pkt);
+    });
+
+    it('cfilter (BIP157)', () => {
+      const check = (pkt) => {
+        assert.equal(pkt.cmd, 'cfilter');
+        assert.equal(pkt.type, packets.types.CFILTER);
+      };
+
+      const hash = Buffer.alloc(32, 0x00);
+      const data = Buffer.alloc(32, 0x00);
+      let pkt = new packets.CFilterPacket(hash, 0, data);
+      check(pkt);
+
+      pkt = packets.CFilterPacket.fromRaw(pkt.toRaw());
+      check(pkt);
+    });
+
+    it('getcfheaders (BIP157)', () => {
+      const check = (pkt) => {
+        assert.equal(pkt.cmd, 'getcfheaders');
+        assert.equal(pkt.type, packets.types.GETCFHEADERS);
+      };
+
+      const stop = Buffer.alloc(32, 0x00);
+      let pkt = new packets.GetCFHeadersPacket([], stop, 0);
+      check(pkt);
+
+      pkt = packets.GetCFHeadersPacket.fromRaw(pkt.toRaw());
+      check(pkt);
+    });
+
+    it('cfheaders (BIP157)', () => {
+      const check = (pkt) => {
+        assert.equal(pkt.cmd, 'cfheaders');
+        assert.equal(pkt.type, packets.types.CFHEADERS);
+      };
+
+      const stop = Buffer.alloc(32, 0x00);
+      let pkt = new packets.CFHeadersPacket(stop, 0, []);
+      check(pkt);
+
+      pkt = packets.CFHeadersPacket.fromRaw(pkt.toRaw());
+      check(pkt);
+    });
+
     it('block', () => {
       const [block] = block300025.getBlock();
       const [witnessBlock] = block482683.getBlock();
